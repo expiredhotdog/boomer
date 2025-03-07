@@ -331,9 +331,9 @@ proc main() =
 
   var wmName = "boomer"
   var wmClass = "Boomer"
-  var hints = XClassHint(res_name: wmName, res_class: wmClass)
+  var hints = XClassHint(res_name: cstring(wmName), res_class: cstring(wmClass))
 
-  discard XStoreName(display, win, wmName)
+  discard XStoreName(display, win, cstring(wmName))
   discard XSetClassHint(display, win, addr(hints))
 
   var wmDeleteMessage = XInternAtom(
@@ -450,16 +450,16 @@ proc main() =
 
       proc scrollUp() =
         if (xev.xkey.state and ControlMask) > 0.uint32 and flashlight.isEnabled:
-          flashlight.deltaRadius += INITIAL_FL_DELTA_RADIUS
+          flashlight.deltaRadius -= INITIAL_FL_DELTA_RADIUS
         else:
-          camera.deltaScale += config.scrollSpeed
+          camera.deltaScale += config.scrollSpeed * ((camera.scale + camera.scale + 1) / 3)
           camera.scalePivot = mouse.curr
 
       proc scrollDown() =
         if (xev.xkey.state and ControlMask) > 0.uint32 and flashlight.isEnabled:
-          flashlight.deltaRadius -= INITIAL_FL_DELTA_RADIUS
+          flashlight.deltaRadius += INITIAL_FL_DELTA_RADIUS
         else:
-          camera.deltaScale -= config.scrollSpeed
+          camera.deltaScale -= config.scrollSpeed * ((camera.scale + 2) / 3)
           camera.scalePivot = mouse.curr
 
       case xev.theType
@@ -529,7 +529,7 @@ proc main() =
         of Button4: scrollUp()
         of Button5: scrollDown()
         else:
-          discard
+          quitting = true
 
       of ButtonRelease:
         case xev.xbutton.button
